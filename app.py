@@ -2,10 +2,10 @@
 from flask import Flask, render_template, request, redirect, url_for, session, flash
 import sqlite3
 from werkzeug.security import generate_password_hash, check_password_hash
-
+from database import create_database
 app = Flask(__name__)
 app.secret_key = "uzhavu_paathai_demo_secret"
-
+create_database()
 
 def get_db():
     conn = sqlite3.connect("uzhavu.db")
