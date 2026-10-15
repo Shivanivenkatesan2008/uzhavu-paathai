@@ -1,0 +1,383 @@
+```html
+<!DOCTYPE html>
+<html lang="ta">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>சலுகைகள் மற்றும் பேச்சுவார்த்தை / Offers & Negotiation | Uzhavu Paathai</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+    <style>
+        .offer-form {
+            margin-bottom: 28px;
+        }
+
+        .offer-table-wrap {
+            overflow-x: auto;
+        }
+
+        .status {
+            display: inline-block;
+            padding: 6px 10px;
+            border-radius: 20px;
+            background: var(--light-green);
+            color: var(--dark-green);
+            font-weight: 700;
+            font-size: 13px;
+        }
+
+        .action-form {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .action-form input {
+            max-width: 180px;
+            min-width: 130px;
+        }
+
+        .action-form button {
+            margin: 2px;
+        }
+    </style>
+</head>
+
+<body>
+
+<header class="site-header">
+    <nav class="navbar">
+
+        <a class="brand" href="/">
+            🌾 உழவுப்பாதை
+            <small>UZHAVU PAATHAI</small>
+        </a>
+
+        <div class="nav-links">
+            <a href="/dashboard">முகப்பு பலகை / Dashboard</a>
+            <a href="/crops">என் பயிர்கள் / My Crops</a>
+            <a href="/markets">சந்தைகள் / Markets</a>
+            <a href="/buyers">வாங்குபவர்கள் / Buyers</a>
+            <a class="active" href="/offers">சலுகைகள் / Offers</a>
+        </div>
+
+    </nav>
+</header>
+
+<main class="container">
+
+    <p class="eyebrow">
+        பேச்சுவார்த்தை • ஒப்புதல் • இணைப்பு /
+        NEGOTIATE • AGREE • CONNECT 🤝
+    </p>
+
+    <h1 class="section-title">
+        விலைச் சலுகைகள் மற்றும் பேச்சுவார்த்தை /
+        Offers & Negotiation
+    </h1>
+
+    <p class="section-subtitle">
+        உங்கள் விலைச் சலுகையை அனுப்பி, வாங்குபவருடனான ஒப்பந்த
+        நிலையைப் பாருங்கள். /
+        Send your price offer and track the agreement with the buyer.
+    </p>
+
+    <div class="notice">
+        <strong>முன்மாதிரி விளக்கம் / Prototype Demo:</strong>
+
+        கீழே உள்ள வாங்குபவரின் செயல்பாடுகள் மாதிரியாகக் காட்டப்படுகின்றன. /
+        Buyer actions below are simulated.
+
+        மாதிரி வாங்குபவர்கள் உண்மையானவர்கள் அல்ல; சரிபார்க்கப்பட்டவர்களும் அல்ல. /
+        Sample buyers are not real or verified.
+
+        “இணைப்பு உறுதி செய்யப்பட்டது” என்பது இந்த demo-வில்
+        இரு தரப்பினரும் ஒப்புக்கொண்டதைக் குறிக்கிறது. /
+        “Linkage Confirmed” means both sides agreed in this demo.
+    </div>
+
+    {% with messages = get_flashed_messages() %}
+        {% for message in messages %}
+            <div class="notice">{{ message }}</div>
+        {% endfor %}
+    {% endwith %}
+
+    <section class="form-card offer-form">
+
+        <h2>
+            புதிய விலைச் சலுகையை அனுப்பு / Send a New Offer
+        </h2>
+
+        <form method="POST" action="{{ url_for('offers') }}">
+
+            <div class="form-group">
+                <label for="buyer_id">
+                    வாங்குபவரைத் தேர்ந்தெடுக்கவும் / Select Buyer
+                </label>
+
+                <select id="buyer_id" name="buyer_id" required>
+                    <option value="">
+                        வாங்குபவரைத் தேர்ந்தெடுக்கவும் / Choose a Buyer
+                    </option>
+
+                    {% for buyer in buyers %}
+                    <option value="{{ buyer['id'] }}"
+                        {% if request.args.get('buyer_id') == buyer['id']|string %}selected{% endif %}>
+
+                        {{ buyer['buyer_name'] }} —
+                        {{ buyer['crop_name'] }}
+                        (₹{{ buyer['offered_price'] }}/kg)
+
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="crop_name">
+                    பயிர் / Crop
+                </label>
+
+                <select id="crop_name" name="crop_name" required>
+                    <option value="">
+                        பயிரைத் தேர்ந்தெடுக்கவும் / Select Crop
+                    </option>
+
+                    <option value="Rice">நெல் / Rice</option>
+                    <option value="Tomato">தக்காளி / Tomato</option>
+                    <option value="Onion">வெங்காயம் / Onion</option>
+                    <option value="Groundnut">நிலக்கடலை / Groundnut</option>
+                    <option value="Banana">வாழைப்பழம் / Banana</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="quantity">
+                    அளவு (கிலோ) / Quantity (kg)
+                </label>
+
+                <input
+                    id="quantity"
+                    type="number"
+                    name="quantity"
+                    min="0.01"
+                    step="any"
+                    placeholder="எ.கா. 300 / e.g. 300"
+                    required
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="price">
+                    நீங்கள் வழங்கும் விலை (₹/கிலோ) /
+                    Your Offer Price (₹ per kg)
+                </label>
+
+                <input
+                    id="price"
+                    type="number"
+                    name="price"
+                    min="0.01"
+                    step="any"
+                    placeholder="எ.கா. 28 / e.g. 28"
+                    required
+                >
+            </div>
+
+            <button class="btn" type="submit">
+                விலைச் சலுகையை அனுப்பு / Send Offer →
+            </button>
+
+        </form>
+    </section>
+
+    <h2 class="section-title">
+        எனது சலுகைகள் மற்றும் இணைப்பு நிலை /
+        My Offers & Linkage Status
+    </h2>
+
+    <div class="offer-table-wrap">
+        <table>
+
+            <thead>
+                <tr>
+                    <th>பயிர் / Crop</th>
+                    <th>வாங்குபவர் / Buyer</th>
+                    <th>அளவு / Quantity</th>
+                    <th>தற்போதைய விலை (₹/கிலோ) / Current Offer per kg</th>
+                    <th>நிலை / Status</th>
+                    <th>விவசாயியின் செயல் / Farmer Action</th>
+                    <th>மாதிரி வாங்குபவரின் செயல் / Demo Buyer Action</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                {% for offer in offers %}
+                <tr>
+
+                    <td>{{ offer['crop_name'] }}</td>
+
+                    <td>{{ offer['buyer_name'] }}</td>
+
+                    <td>{{ offer['quantity'] }} kg</td>
+
+                    <td>
+                        ₹{{ "%.2f"|format(offer['price_per_kg']) }}
+                    </td>
+
+                    <td>
+                        <span class="status">
+                            {{ offer['status'] }}
+                        </span>
+                    </td>
+
+                    <td>
+
+                        {% if offer['status'] == 'Counter Offer' %}
+
+                        <form
+                            class="action-form"
+                            method="POST"
+                            action="{{ url_for('respond_offer', offer_id=offer['id']) }}"
+                        >
+                            <button
+                                class="btn"
+                                name="action"
+                                value="accept"
+                                type="submit"
+                            >
+                                எதிர் சலுகையை ஏற்கவும் / Accept Counter
+                            </button>
+
+                            <button
+                                class="btn btn-outline"
+                                name="action"
+                                value="reject"
+                                type="submit"
+                            >
+                                நிராகரிக்கவும் / Reject
+                            </button>
+                        </form>
+
+                        {% elif offer['status'] == 'Pending' %}
+
+                        <form
+                            method="POST"
+                            action="{{ url_for('respond_offer', offer_id=offer['id']) }}"
+                        >
+                            <button
+                                class="btn btn-outline"
+                                name="action"
+                                value="reject"
+                                type="submit"
+                            >
+                                சலுகையை ரத்து செய் / Cancel Offer
+                            </button>
+                        </form>
+
+                        {% else %}
+
+                        —
+
+                        {% endif %}
+
+                    </td>
+
+                    <td>
+
+                        {% if offer['status'] == 'Pending' %}
+
+                        <form
+                            class="action-form"
+                            method="POST"
+                            action="{{ url_for('buyer_response', offer_id=offer['id']) }}"
+                        >
+                            <button
+                                class="btn"
+                                name="action"
+                                value="accept"
+                                type="submit"
+                            >
+                                ஏற்கவும் / Accept
+                            </button>
+
+                            <input
+                                type="number"
+                                name="counter_price"
+                                min="0.01"
+                                step="any"
+                                placeholder="எதிர் விலை ₹/கிலோ / Counter ₹/kg"
+                                aria-label="எதிர் விலை / Counter Price"
+                            >
+
+                            <button
+                                class="btn btn-outline"
+                                name="action"
+                                value="counter"
+                                type="submit"
+                            >
+                                எதிர் சலுகை / Counter Offer
+                            </button>
+                        </form>
+
+                        {% else %}
+
+                        —
+
+                        {% endif %}
+
+                    </td>
+
+                </tr>
+
+                {% else %}
+
+                <tr>
+                    <td colspan="7">
+                        இதுவரை சலுகைகள் இல்லை. மேலே உங்கள் முதல் சலுகையை அனுப்புங்கள். /
+                        No offers yet. Send your first offer above.
+                    </td>
+                </tr>
+
+                {% endfor %}
+
+            </tbody>
+        </table>
+    </div>
+
+    <p style="margin-top: 24px">
+
+        <a class="btn btn-outline" href="/buyers">
+            ← வாங்குபவர்களைக் கண்டறி / Find Buyers
+        </a>
+
+        <a class="btn" href="/dashboard">
+            முகப்பு பலகை / Dashboard
+        </a>
+
+    </p>
+
+</main>
+
+<footer class="site-footer">
+    <p>
+        🌾 உழவுப்பாதை / Uzhavu Paathai
+    </p>
+
+    <p>
+        நியாயமான விலை, சிறந்த இணைப்பு /
+        Fair Price, Better Linkage.
+    </p>
+
+    <p>
+        முன்மாதிரி விளக்கத்திற்காக மட்டுமே /
+        For Prototype Demonstration Only
+    </p>
+</footer>
+
+</body>
+</html>
