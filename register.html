@@ -1,0 +1,170 @@
+
+<!DOCTYPE html>
+<html lang="ta">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>விவசாயி பதிவு / Farmer Registration | Uzhavu Paathai</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+<header class="site-header">
+    <nav class="navbar">
+
+        <a class="brand" href="/">
+            🌾 உழவுப்பாதை / Uzhavu Paathai
+            <small>UZHAVU PAATHAI</small>
+        </a>
+
+        <div class="nav-links">
+            <a href="/">முகப்பு / Home</a>
+            <a href="/login">உள்நுழைவு / Login</a>
+        </div>
+
+    </nav>
+</header>
+
+<main class="container">
+
+    <form class="form-card" method="POST" autocomplete="off">
+
+        <p class="eyebrow">
+            விவசாயிகள் சமூகத்தில் இணையுங்கள் /
+            Join Our Farmer Community 🌱
+        </p>
+
+        <h1 class="section-title">
+            விவசாயி பதிவு / Farmer Registration
+        </h1>
+
+        <p class="section-subtitle">
+            உழவுப்பாதை கணக்கை உருவாக்குங்கள் /
+            Create your Uzhavu Paathai account.
+        </p>
+
+        {% with messages = get_flashed_messages() %}
+            {% for message in messages %}
+                <div class="notice">{{ message }}</div>
+            {% endfor %}
+        {% endwith %}
+
+        <div class="form-group">
+
+            <label for="name">
+                விவசாயியின் பெயர் / Farmer Name *
+            </label>
+
+            <input
+                id="name"
+                type="text"
+                name="name"
+                placeholder="முழுப் பெயரை உள்ளிடவும் / Enter your full name"
+                autocomplete="off"
+                required
+            >
+
+        </div>
+
+        <div class="form-group">
+
+            <label for="mobile">
+                கைப்பேசி எண் / Mobile Number *
+            </label>
+
+            <input
+                id="mobile"
+                type="tel"
+                name="mobile"
+                pattern="[0-9]{10}"
+                maxlength="10"
+                placeholder="10 இலக்க எண் / 10-digit mobile number"
+                autocomplete="off"
+                required
+            >
+
+        </div>
+
+        <div class="form-group">
+
+            <label for="password">
+                கடவுச்சொல் / Password *
+            </label>
+
+            <input
+                id="password"
+                type="password"
+                name="password"
+                minlength="6"
+                placeholder="குறைந்தது 6 எழுத்துகள் / At least 6 characters"
+                autocomplete="new-password"
+                required
+            >
+
+        </div>
+
+        <div class="form-group">
+
+            <label for="village">
+                கிராமம் / Village
+            </label>
+
+            <input
+                id="village"
+                type="text"
+                name="village"
+                placeholder="கிராமத்தின் பெயர் / Enter your village"
+                autocomplete="off"
+            >
+
+        </div>
+
+        <div class="form-group">
+
+            <label for="district">
+                மாவட்டம் / District
+            </label>
+
+            <input
+                id="district"
+                type="text"
+                name="district"
+                placeholder="மாவட்டத்தின் பெயர் / Enter your district"
+                autocomplete="off"
+            >
+
+        </div>
+
+        <button class="btn" type="submit">
+            கணக்கை உருவாக்கு / Create Account →
+        </button>
+
+        <p>
+            ஏற்கனவே பதிவு செய்துள்ளீர்களா? /
+            Already registered?
+
+            <a href="/login">
+                <strong>உள்நுழையுங்கள் / Login Here</strong>
+            </a>
+        </p>
+
+        <a href="/">
+            ← முகப்புக்குத் திரும்பு / Back to Home
+        </a>
+
+    </form>
+
+</main>
+
+<footer class="site-footer">
+    <p>
+        🌾 விவசாயிகளுக்கு சிறந்த சந்தை, சிறந்த விலை /
+        Uzhavu Paathai — Better Market. Better Price.
+    </p>
+</footer>
+
+</body>
+</html>

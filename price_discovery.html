@@ -1,0 +1,276 @@
+```html
+<!DOCTYPE html>
+<html lang="ta">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>நிகர வருமானக் கணக்கீடு / Price Discovery | Uzhavu Paathai</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+    <style>
+        .result-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 16px;
+            margin-top: 24px;
+        }
+
+        .result-card {
+            padding: 22px;
+            border-radius: 18px;
+            background: var(--light-green);
+        }
+
+        .result-card strong {
+            display: block;
+            font-size: 24px;
+            color: var(--dark-green);
+            overflow-wrap: anywhere;
+        }
+
+        .result-card.net {
+            background: var(--dark-green);
+            color: white;
+        }
+
+        .result-card.net strong {
+            color: white;
+        }
+    </style>
+</head>
+
+<body>
+
+<header class="site-header">
+    <nav class="navbar">
+        <a class="brand" href="/">
+            🌾 உழவுப்பாதை
+            <small>UZHAVU PAATHAI</small>
+        </a>
+
+        <div class="nav-links">
+            <a href="/dashboard">முகப்பு பலகை / Dashboard</a>
+            <a href="/crops">என் பயிர்கள் / My Crops</a>
+            <a href="/markets">சந்தைகள் / Markets</a>
+            <a href="/buyers">வாங்குபவர்கள் / Buyers</a>
+            <a href="/offers">சலுகைகள் / Offers</a>
+        </div>
+    </nav>
+</header>
+
+<main class="container">
+
+    <p class="eyebrow">
+        சிறந்த விலை கண்டறிதல் / SMART PRICE DISCOVERY 🌱
+    </p>
+
+    <h1 class="section-title">
+        நிகர வருமானக் கணக்கீடு / Net Return Calculation
+    </h1>
+
+    <p class="section-subtitle">
+        விற்பனை மற்றும் போக்குவரத்துச் செலவுகளைக் கழித்து
+        எதிர்பார்க்கும் வருமானத்தைக் கணக்கிடுங்கள். /
+        Calculate your expected return after selling and transport-related costs.
+    </p>
+
+    <div class="notice">
+        <strong>குறிப்பு / Note:</strong>
+        இந்தக் கணக்கீடு நீங்கள் உள்ளிடும் மதிப்புகளை அடிப்படையாகக் கொண்டது. /
+        This calculation is based on the values you enter.
+
+        இது உறுதியான சந்தை விலையோ லாப உத்தரவாதமோ அல்ல. /
+        These are not guaranteed market prices or profits.
+    </div>
+
+    {% with messages = get_flashed_messages() %}
+        {% for message in messages %}
+            <div class="notice">{{ message }}</div>
+        {% endfor %}
+    {% endwith %}
+
+    <form class="form-card" method="POST">
+
+        <h2>விற்பனை விவரங்கள் / Selling Details</h2>
+
+        <div class="form-group">
+            <label for="crop">
+                பயிர் / Crop
+            </label>
+
+            <select id="crop" name="crop" required>
+                <option value="Rice">நெல் / Rice</option>
+                <option value="Tomato">தக்காளி / Tomato</option>
+                <option value="Onion">வெங்காயம் / Onion</option>
+                <option value="Groundnut">நிலக்கடலை / Groundnut</option>
+                <option value="Banana">வாழைப்பழம் / Banana</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="quantity">
+                அளவு (கிலோகிராமில்) / Quantity (in kg)
+            </label>
+
+            <input
+                id="quantity"
+                type="number"
+                name="quantity"
+                min="0.01"
+                step="any"
+                placeholder="எ.கா. 1000 / e.g. 1000"
+                required
+            >
+        </div>
+
+        <div class="form-group">
+            <label for="price">
+                ஒரு கிலோவிற்கான விற்பனை விலை (₹) / Selling Price per kg (₹)
+            </label>
+
+            <input
+                id="price"
+                type="number"
+                name="price"
+                min="0"
+                step="any"
+                placeholder="எ.கா. 35 / e.g. 35"
+                required
+            >
+        </div>
+
+        <div class="form-group">
+            <label for="transport">
+                போக்குவரத்துச் செலவு (₹) / Transport Cost (₹)
+            </label>
+
+            <input
+                id="transport"
+                type="number"
+                name="transport"
+                min="0"
+                step="any"
+                value="0"
+                required
+            >
+        </div>
+
+        <div class="form-group">
+            <label for="storage">
+                சேமிப்புச் செலவு (₹) / Storage Cost (₹)
+            </label>
+
+            <input
+                id="storage"
+                type="number"
+                name="storage"
+                min="0"
+                step="any"
+                value="0"
+                required
+            >
+        </div>
+
+        <div class="form-group">
+            <label for="other">
+                பிற செலவுகள் (₹) / Other Expenses (₹)
+            </label>
+
+            <input
+                id="other"
+                type="number"
+                name="other"
+                min="0"
+                step="any"
+                value="0"
+                required
+            >
+        </div>
+
+        <button class="btn" type="submit">
+            நிகர வருமானத்தைக் கணக்கிடு / Calculate Net Return →
+        </button>
+
+    </form>
+
+    {% if result %}
+
+    <section style="margin-top: 32px">
+
+        <h2 class="section-title">
+            உங்கள் கணக்கீடு / Your Result
+        </h2>
+
+        <div class="result-grid">
+
+            <div class="result-card">
+                <p>
+                    மொத்த விற்பனைத் தொகை / Total Selling Amount
+                </p>
+
+                <strong>
+                    ₹{{ "%.2f"|format(result.total) }}
+                </strong>
+            </div>
+
+            <div class="result-card">
+                <p>
+                    மொத்த செலவுகள் / Total Expenses
+                </p>
+
+                <strong>
+                    ₹{{ "%.2f"|format(result.expenses) }}
+                </strong>
+            </div>
+
+            <div class="result-card net">
+                <p>
+                    நிகர வருவாய் / Net Realization
+                </p>
+
+                <strong>
+                    ₹{{ "%.2f"|format(result.net) }}
+                </strong>
+            </div>
+
+        </div>
+
+        <p style="margin-top: 20px">
+            நிகர வருவாய் = விற்பனைத் தொகை − மொத்தச் செலவுகள். /
+            Net realization = Selling amount − Total expenses.
+
+            இது உற்பத்திச் செலவுகளை உள்ளடக்காது; எனவே இது முழுமையான
+            லாபக் கணக்கீடு அல்ல. /
+            Production costs are excluded, so this is not the total profit.
+        </p>
+
+    </section>
+
+    {% endif %}
+
+    <p style="margin-top: 28px">
+        <a class="btn btn-outline" href="/markets">
+            ← சந்தைகளை ஒப்பிடு / Compare Markets
+        </a>
+
+        <a class="btn" href="/buyers">
+            வாங்குபவர்களைக் கண்டறி / Find Buyers →
+        </a>
+    </p>
+
+</main>
+
+<footer class="site-footer">
+    <p>
+        🌾 உழவுப்பாதை / Uzhavu Paathai
+    </p>
+
+    <p>
+        சிறந்த சந்தை, சிறந்த விலை / Better Market. Better Price.
+    </p>
+</footer>
+
+</body>
+</html>
+```

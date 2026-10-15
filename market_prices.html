@@ -1,0 +1,205 @@
+```html
+<!DOCTYPE html>
+<html lang="ta">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>சந்தை விலை ஒப்பீடு / Market Comparison | Uzhavu Paathai</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+    <style>
+        .filter-bar {
+            display: flex;
+            align-items: end;
+            gap: 14px;
+            flex-wrap: wrap;
+            padding: 22px;
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            margin-bottom: 26px;
+        }
+
+        .filter-bar .form-group {
+            flex: 1;
+            min-width: 190px;
+            margin: 0;
+        }
+
+        .price {
+            color: var(--green);
+            font-size: 18px;
+            font-weight: 800;
+        }
+
+        .best-price {
+            background: #eaf4e7;
+        }
+    </style>
+</head>
+
+<body>
+
+<header class="site-header">
+    <nav class="navbar">
+        <a class="brand" href="/">
+            🌾 உழவுப்பாதை
+            <small>UZHAVU PAATHAI</small>
+        </a>
+
+        <div class="nav-links">
+            <a href="/dashboard">முகப்பு பலகை / Dashboard</a>
+            <a href="/crops">என் பயிர்கள் / My Crops</a>
+            <a class="active" href="/markets">சந்தைகள் / Markets</a>
+            <a href="/buyers">வாங்குபவர்கள் / Buyers</a>
+            <a href="/offers">சலுகைகள் / Offers</a>
+        </div>
+    </nav>
+</header>
+
+<main class="container">
+
+    <p class="eyebrow">
+        விலை கண்டறிதல் / PRICE DISCOVERY 🌱
+    </p>
+
+    <h1 class="section-title">
+        சந்தை விலை ஒப்பீடு / Market Price Comparison
+    </h1>
+
+    <p class="section-subtitle">
+        விற்பனை செய்யும் சந்தையைத் தேர்ந்தெடுக்கும் முன் பல சந்தைகளின்
+        விலைகளை ஒப்பிடுங்கள். /
+        Compare prices across multiple markets before choosing where to sell.
+    </p>
+
+    <div class="notice">
+        <strong>மாதிரி தரவு / Demo Data:</strong>
+        இங்குள்ள விலைகள் மாதிரி விலைகள் மட்டுமே; இவை நேரடி சந்தை விலைகள் அல்ல. /
+        These are sample prices, not real-time market prices.
+    </div>
+
+    <form class="filter-bar" method="GET" action="/markets">
+
+        <div class="form-group">
+            <label for="crop">
+                பயிரைத் தேர்ந்தெடுக்கவும் / Select Crop
+            </label>
+
+            <select id="crop" name="crop">
+                <option value="">
+                    எல்லா பயிர்களும் / All Crops
+                </option>
+
+                {% for name in ['Rice', 'Tomato', 'Onion', 'Groundnut', 'Banana'] %}
+                <option value="{{ name }}"
+                    {% if selected_crop == name %}selected{% endif %}>
+                    {{ name }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <button class="btn" type="submit">
+            விலைகளை ஒப்பிடு / Compare Prices →
+        </button>
+
+    </form>
+
+    <section class="grid" style="margin-bottom: 28px">
+
+        <article class="card">
+            <h3>📍 பல சந்தைகள் / Multiple Markets</h3>
+            <p>
+                ஒரே பயிருக்கு வெவ்வேறு சந்தைகளின் விலைகளைப் பாருங்கள். /
+                Compare prices for the same crop across different markets.
+            </p>
+        </article>
+
+        <article class="card">
+            <h3>💰 சிறந்த விலையைக் கண்டறிதல் / Better Price Discovery</h3>
+            <p>
+                விலைகளை ஒப்பிட்டு உங்கள் விற்பனை முடிவைத் தேர்வு செய்யுங்கள். /
+                Compare prices to make your selling decision.
+            </p>
+        </article>
+
+        <article class="card">
+            <h3>🚚 நிகர வருமானம் முக்கியம் / Net Return Matters</h3>
+            <p>
+                போக்குவரத்து மற்றும் சேமிப்புச் செலவுகளையும் கணக்கில் கொள்ளுங்கள். /
+                Consider transport and storage costs too.
+            </p>
+        </article>
+
+    </section>
+
+    <h2 class="section-title">
+        சந்தை விலைப் பட்டியல் / Market Price List
+    </h2>
+
+    {% if prices %}
+
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>பயிர் / Crop</th>
+                    <th>சந்தை / Market</th>
+                    <th>மாவட்டம் / District</th>
+                    <th>மாதிரி விலை / kg / Sample Price / kg</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for item in prices %}
+                <tr {% if loop.first and selected_crop %}class="best-price"{% endif %}>
+                    <td>{{ item['crop_name'] }}</td>
+                    <td>{{ item['market_name'] }}</td>
+                    <td>{{ item['district'] }}</td>
+                    <td class="price">
+                        ₹{{ "%.2f"|format(item['price_per_kg']) }}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% else %}
+
+    <div class="card">
+        <h3>
+            சந்தை விலைகள் கிடைக்கவில்லை / No Market Prices Found
+        </h3>
+        <p>
+            வேறு பயிரைத் தேர்வு செய்து மீண்டும் முயற்சி செய்யுங்கள். /
+            Select another crop and try again.
+        </p>
+    </div>
+
+    {% endif %}
+
+    <p style="margin-top: 24px">
+        <a class="btn" href="/price-discovery">
+            நிகர வருமானத்தைக் கணக்கிடு / Calculate Net Return →
+        </a>
+
+        <a class="btn btn-outline" href="/buyers">
+            வாங்குபவர்களைக் கண்டறி / Find Buyers →
+        </a>
+    </p>
+
+</main>
+
+<footer class="site-footer">
+    <p>🌾 உழவுப்பாதை / Uzhavu Paathai</p>
+    <p>
+        முன்மாதிரி விளக்கத்திற்கான மாதிரி சந்தை விலைகள் மட்டுமே. /
+        Sample market prices for prototype demonstration only.
+    </p>
+</footer>
+
+</body>
+</html>
+```

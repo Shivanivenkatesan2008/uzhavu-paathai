@@ -1,0 +1,223 @@
+```html
+<!DOCTYPE html>
+<html lang="ta">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>வாங்குபவர்களைக் கண்டறி / Find Buyers | Uzhavu Paathai</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+    <style>
+        .filter-bar {
+            display: flex;
+            align-items: end;
+            gap: 14px;
+            flex-wrap: wrap;
+            padding: 22px;
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            margin-bottom: 26px;
+        }
+
+        .filter-bar .form-group {
+            flex: 1;
+            min-width: 190px;
+            margin: 0;
+        }
+
+        .buyer-card {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .buyer-price {
+            color: var(--green);
+            font-size: 28px;
+            font-weight: 800;
+        }
+
+        .condition {
+            padding: 10px 12px;
+            border-radius: 10px;
+            background: var(--light-green);
+            font-size: 14px;
+            overflow-wrap: anywhere;
+        }
+
+        .buyer-card .btn {
+            margin-top: auto;
+        }
+    </style>
+</head>
+
+<body>
+
+<header class="site-header">
+    <nav class="navbar">
+
+        <a class="brand" href="/">
+            🌾 உழவுப்பாதை
+            <small>UZHAVU PAATHAI</small>
+        </a>
+
+        <div class="nav-links">
+            <a href="/dashboard">முகப்பு பலகை / Dashboard</a>
+            <a href="/crops">என் பயிர்கள் / My Crops</a>
+            <a href="/markets">சந்தைகள் / Markets</a>
+            <a class="active" href="/buyers">வாங்குபவர்கள் / Buyers</a>
+            <a href="/offers">சலுகைகள் / Offers</a>
+        </div>
+
+    </nav>
+</header>
+
+<main class="container">
+
+    <p class="eyebrow">
+        வாங்குபவர்களைக் கண்டறிதல் / BUYER DISCOVERY 🤝
+    </p>
+
+    <h1 class="section-title">
+        பொருத்தமான வாங்குபவர்களைக் கண்டறியுங்கள் / Find Suitable Buyers
+    </h1>
+
+    <p class="section-subtitle">
+        வாங்குபவர்களின் தேவைகளை ஒப்பிட்டு, உங்கள் பயிருக்கு ஏற்ற
+        சலுகையை அனுப்புங்கள். /
+        Compare buyer requirements and send an offer that matches your crop.
+    </p>
+
+    <div class="notice">
+        <strong>மாதிரி தரவு / Demo Data:</strong>
+        இவை முன்மாதிரிக்காக உருவாக்கப்பட்ட மாதிரி வாங்குபவர்கள் மட்டுமே. /
+        These are sample buyers created for the prototype.
+
+        உண்மையான வாங்குபவர் சரிபார்ப்போ நேரடி இணைப்போ கிடையாது. /
+        There is no real buyer verification or live connection.
+    </div>
+
+    <form class="filter-bar" method="GET" action="/buyers">
+
+        <div class="form-group">
+            <label for="crop">
+                பயிர் அடிப்படையில் வடிகட்டவும் / Filter by Crop
+            </label>
+
+            <select id="crop" name="crop">
+                <option value="">
+                    அனைத்துப் பயிர்களும் / All Crops
+                </option>
+
+                {% for name in ['Rice', 'Tomato', 'Onion', 'Groundnut', 'Banana'] %}
+                <option value="{{ name }}"
+                    {% if selected_crop == name %}selected{% endif %}>
+                    {{ name }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <button class="btn" type="submit">
+            வாங்குபவர்களைக் கண்டறி / Find Buyers →
+        </button>
+
+    </form>
+
+    <div class="grid">
+
+        {% for buyer in buyers %}
+
+        <article class="card buyer-card">
+
+            <h2>
+                {{ buyer['buyer_name'] }}
+            </h2>
+
+            <p>
+                <strong>பயிர் / Crop:</strong>
+                {{ buyer['crop_name'] }}
+            </p>
+
+            <p class="buyer-price">
+                ₹{{ "%.2f"|format(buyer['offered_price']) }}
+                <small>/ kg</small>
+            </p>
+
+            <div class="condition">
+                <strong>தேவையான அளவு / Required Quantity</strong>
+                <p>{{ buyer['required_quantity'] }} kg</p>
+            </div>
+
+            <div class="condition">
+                <strong>தரம் / Quality</strong>
+                <p>{{ buyer['quality'] or 'குறிப்பிடப்படவில்லை / Not specified' }}</p>
+            </div>
+
+            <div class="condition">
+                <strong>விரும்பும் இடம் / Preferred Location</strong>
+                <p>{{ buyer['district'] or 'குறிப்பிடப்படவில்லை / Not specified' }}</p>
+            </div>
+
+            <div class="condition">
+                <strong>கட்டண விதிமுறைகள் / Payment Terms</strong>
+                <p>{{ buyer['payment_terms'] or 'பேசித் தீர்மானிக்கப்படும் / To be discussed' }}</p>
+            </div>
+
+            <div class="condition">
+                <strong>விநியோக நிபந்தனைகள் / Delivery Conditions</strong>
+                <p>{{ buyer['delivery_terms'] or 'பேசித் தீர்மானிக்கப்படும் / To be discussed' }}</p>
+            </div>
+
+            <a class="btn"
+               href="{{ url_for('offers', buyer_id=buyer['id']) }}">
+                சலுகையை அனுப்பு / Send Offer →
+            </a>
+
+        </article>
+
+        {% else %}
+
+        <div class="card">
+            <h3>
+                பொருத்தமான வாங்குபவர்கள் கிடைக்கவில்லை / No Matching Buyers Found
+            </h3>
+
+            <p>
+                வேறு பயிரைத் தேர்வு செய்து முயற்சி செய்யுங்கள். /
+                Select another crop and try again.
+            </p>
+        </div>
+
+        {% endfor %}
+
+    </div>
+
+    <p style="margin-top: 28px">
+        <a class="btn btn-outline" href="/markets">
+            ← சந்தைகளை ஒப்பிடு / Compare Markets
+        </a>
+    </p>
+
+</main>
+
+<footer class="site-footer">
+    <p>
+        🌾 உழவுப்பாதை / Uzhavu Paathai
+    </p>
+
+    <p>
+        விவசாயி மற்றும் வாங்குபவர் இணைப்பு / Farmer & Buyer Linkage
+    </p>
+
+    <p>
+        முன்மாதிரி பயன்பாடு / Prototype Demonstration Only
+    </p>
+</footer>
+
+</body>
+</html>
+```
