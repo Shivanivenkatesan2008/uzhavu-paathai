@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Buyer Matching | சிறந்த வாங்குபவர் பொருத்தம்</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
+
+    <style>
+        .matching-container {
+            max-width: 1000px;
+            margin: 35px auto;
+            padding: 20px;
+        }
+
+        .matching-heading {
+            text-align: center;
+            color: #245c36;
+            margin-bottom: 25px;
+        }
+
+        .match-card {
+            background: white;
+            padding: 22px;
+            margin: 18px 0;
+            border-radius: 14px;
+            box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+        }
+
+        .score {
+            color: #217a3c;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .match-button {
+            display: inline-block;
+            background: #245c36;
+            color: white;
+            padding: 10px 18px;
+            border-radius: 8px;
+            text-decoration: none;
+        }
+
+        .no-match {
+            background: #fff8e7;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="matching-container">
+
+    <div class="matching-heading">
+        <h1>Smart Farmer–Buyer Matching</h1>
+        <h2>சிறந்த விவசாயி–வாங்குபவர் பொருத்தம்</h2>
+
+        <p>
+            Find suitable buyers for your crops.
+            <br>
+            உங்கள் பயிர்களுக்கு ஏற்ற வாங்குபவர்களைக் கண்டறியுங்கள்.
+        </p>
+    </div>
+
+    {% if crop %}
+
+    <div class="match-card">
+        <h2>Crop Details / பயிர் விவரங்கள்</h2>
+
+        <p>
+            <strong>Crop Name / பயிரின் பெயர்:</strong>
+            {{ crop["crop_name"] }}
+        </p>
+
+        <p>
+            <strong>Quantity / அளவு:</strong>
+            {{ crop["quantity"] }} {{ crop["unit"] }}
+        </p>
+
+        <p>
+            <strong>Quality / தரம்:</strong>
+            {{ crop["quality"] }}
+        </p>
+    </div>
+
+    <h2>Recommended Buyers / பரிந்துரைக்கப்படும் வாங்குபவர்கள்</h2>
+
+    {% if matches %}
+
+        {% for match in matches %}
+
+        <div class="match-card">
+
+            <h3>
+                {{ match["buyer"]["buyer_name"] }}
+            </h3>
+
+            <p class="score">
+                {{ match["score"] }}%
+                <br>
+                <small>Match Score / பொருத்த மதிப்பெண்</small>
+            </p>
+
+            <p>
+                <strong>Required Quantity / தேவைப்படும் அளவு:</strong>
+                {{ match["buyer"]["required_quantity"] }}
+            </p>
+
+            <p>
+                <strong>Quality / தரம்:</strong>
+                {{ match["buyer"]["quality"] }}
+            </p>
+
+            <p>
+                <strong>District / மாவட்டம்:</strong>
+                {{ match["buyer"]["district"] }}
+            </p>
+
+            <p>
+                <strong>Offered Price / வழங்கப்படும் விலை:</strong>
+                ₹{{ match["buyer"]["offered_price"] }}
+            </p>
+
+            <h4>Why this match? / இந்தப் பொருத்தத்திற்கான காரணங்கள்</h4>
+
+            <ul>
+                {% for reason in match["reasons"] %}
+                    <li>{{ reason }}</li>
+                {% endfor %}
+            </ul>
+
+        </div>
+
+        {% endfor %}
+
+    {% else %}
+
+        <div class="no-match">
+            <h3>No Matching Buyers Found</h3>
+            <h3>பொருத்தமான வாங்குபவர்கள் கிடைக்கவில்லை</h3>
+            <p>Try adding another crop or checking your crop details.</p>
+            <p>வேறு பயிரைச் சேர்க்கவும் அல்லது பயிர் விவரங்களைச் சரிபார்க்கவும்.</p>
+        </div>
+
+    {% endif %}
+        <!-- BINARY SEARCH PRICE MATCHING -->
+
+    <h2>💰 Price-Based Buyer Search / விலை அடிப்படையிலான வாங்குபவர் தேடல்</h2>
+
+    <div class="match-card">
+
+        <p>
+            <strong>Farmer Expected Price / விவசாயியின் எதிர்பார்ப்பு விலை:</strong>
+            ₹{{ crop["expected_price"] }}
+        </p>
+
+        {% if price_matches %}
+
+            <h3>Qualifying Buyers / தகுதியான வாங்குபவர்கள்</h3>
+
+            {% for buyer in price_matches %}
+
+                <p>
+                    <strong>{{ buyer["buyer_name"] }}</strong>
+                </p>
+
+                <p>
+                    Offered Price / வழங்கும் விலை:
+                    <strong>₹{{ buyer["offered_price"] }}</strong>
+                </p>
+
+                <hr>
+
+            {% endfor %}
+
+        {% else %}
+
+            <div class="no-match">
+                <p>No buyers meet your expected price.</p>
+                <p>உங்கள் எதிர்பார்ப்பு விலையை வழங்கும் வாங்குபவர்கள் இல்லை.</p>
+            </div>
+
+        {% endif %}
+
+    </div>
+
+    {% else %}
+
+    <div class="no-match">
+        <h3>No Crop Added Yet / இன்னும் பயிர் சேர்க்கப்படவில்லை</h3>
+        <p>Please add a crop first.</p>
+        <p>முதலில் உங்கள் பயிரைச் சேர்க்கவும்.</p>
+        <a href="{{ url_for('crops') }}" class="match-button">
+            Add Crop / பயிரைச் சேர்
+        </a>
+    </div>
+
+    {% endif %}
+
+    <br>
+
+    <a href="{{ url_for('dashboard') }}" class="match-button">
+        Back to Dashboard / முகப்புக்குத் திரும்பு
+    </a>
+
+</div>
+
+</body>
+</html>
