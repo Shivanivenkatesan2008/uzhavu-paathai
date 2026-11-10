@@ -1,12 +1,14 @@
-
 from flask import Flask, render_template, request, redirect, url_for, session, flash
 import sqlite3
-import os
+from matching_engine import (
+    find_best_buyers,
+    find_price_qualifying_buyers
+)
 from werkzeug.security import generate_password_hash, check_password_hash
-from database import create_database
+
 app = Flask(__name__)
-app.secret_key = os.environ.get("SECRET_KEY", "uzhavu_paathai_demo_secret")
-create_database()
+app.secret_key = "uzhavu_paathai_demo_secret"
+
 
 def get_db():
     conn = sqlite3.connect("uzhavu.db")
@@ -443,7 +445,64 @@ def respond_offer(offer_id):
 def logout():
     session.clear()
     return redirect(url_for("home"))
+@app.route("/smart-matching")
+def smart_matching():
 
+    if "farmer_id" not in session:
+        return redirect(url_for("login"))
+
+    db = get_db()
+
+    farmer = db.execute(
+        "SELECT district FROM farmers WHERE id = ?",
+        (session["farmer_id"],)
+    ).fetchone()
+
+    crop = db.execute(
+        """
+        SELECT * FROM crops
+        WHERE farmer_id = ?
+        ORDER BY id DESC
+        LIMIT 1
+        """,
+        (session["farmer_id"],)
+    ).fetchone()
+
+    matches = []
+    price_matches = []
+
+    if crop:
+        buyers = db.execute(
+            "SELECT * FROM buyers"
+        ).fetchall()
+
+        matches = find_best_buyers(
+            crop,
+            buyers,
+            farmer["district"] or ""
+        )
+
+        price_matches = find_price_qualifying_buyers(
+            buyers,
+            crop["expected_price"]
+        )
+
+        # Show only buyers matching the farmer's crop
+        crop_name = str(crop["crop_name"] or "").strip().lower()
+
+        price_matches = [
+            buyer for buyer in price_matches
+            if str(buyer["crop_name"] or "").strip().lower() == crop_name
+        ]
+
+    db.close()
+
+    return render_template(
+        "smart_matching.html",
+        crop=crop,
+        matches=matches,
+        price_matches=price_matches
+    )
 
 if __name__ == "__main__":
     app.run(debug=True)
