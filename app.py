@@ -8,6 +8,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from database import create_database
 
 app = Flask(__name__)
+create_database()
 app.secret_key = "uzhavu_paathai_demo_secret"
 
 
